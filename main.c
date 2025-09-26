@@ -1,38 +1,22 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
-
-typedef enum { STRING, NUM, ARRAY } vtypei;
-
-typedef struct {
-    char* key;
-    vtypei valuetype;
-    int arraycount;
-    union vtype {
-        int num;
-        char* string;
-        JSON* array;
-    } value;
-} JSON;
-
-JSON jsonfilecon;
-int arraydepth;
+#include <stdlib.h>
+#include <string.h>
 
 int main(int argc, char** argv) {
-    if(argc != 2) {
-        fprintf(stderr, "Usage: %s [JSON file]\n", argv[0]);
-        return -1;
+    if(argc != 3) {
+        fprintf(stderr, "Usage: %s [key to find] [JSON data]\n", argv[0]);
+        return 1;
     }
-    FILE* jsonfile = fopen(argv[1], "rb");
-    int ch = 0;
-    while((ch = getc(jsonfile)) != EOF) {
-        switch(ch) {
-            case '{':
-            {
-                if(jsonfilecon.arraycount = 0) {
-                    //
-                }
-            }
-        }
+
+    char* json_data = argv[2];
+    size_t json_len = strlen(json_data);
+    if(*json_data != '{') {
+        fprintf(stderr, "Invalid JSON object!\n");
+        return 1;
+    }
+    if(json_data[json_len - 1] != '}') {
+        fprintf(stderr, "Invalid JSON object!\n");
+        return 1;
     }
 }
