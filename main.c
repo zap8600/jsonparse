@@ -19,4 +19,9 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Invalid JSON object!\n");
         return 1;
     }
+
+    memcpy(json_data, json_data + 1, --json_len);
+    json_data[json_len] = '\0';
+
+    //
 }
