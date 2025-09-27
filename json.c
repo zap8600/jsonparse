@@ -159,9 +159,7 @@ bool parse_json_data(char* json_data) {
             } else if((*value == '-') || isdigit(*value)) {
                 type = number;
                 char* number_ptr = value;
-                printf("getting number!\n");
                 long number_value = strtol(number_ptr, &value, 10);
-                printf("got number: %ld\n", number_value);
                 json_values = (json_value*)realloc(json_values, (++values_len) * sizeof(json_value));
                 json_value new_value = {0};
                 new_value.type = type;
