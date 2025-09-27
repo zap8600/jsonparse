@@ -3,34 +3,68 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
+#include "json.h"
 
-typedef enum value_type { string, number } value_type;
+static char** keys = NULL;
+static size_t keys_len = 0;
+static json_value* json_values = NULL;
+static size_t values_len = 0;
 
-typedef struct json_value {
-    value_type type;
-    union {
-        char* string;
-        long number;
-    } value;
-} json_value;
+void deinit_parsed_data() {
+    if(keys != NULL) {
+        for(size_t i = 0; i < keys_len; i++) {
+            free(keys[i]);
+        }
+        free(keys);
+    }
+    if(json_values != NULL) {
+        for(size_t i = 0; i < values_len; i++) {
+            if(json_values[i].type == string) {
+                free(json_values[i].value.string);
+            }
+        }
+        free(json_values);
+    }
+}
 
-int main(int argc, char** argv) {
-    if(argc < 2) {
-        fprintf(stderr, "Usage: %s [JSON data] [key to find]\n", argv[0]);
-        return 1;
+json_value* get_json_value(char* target_key) {
+    static json_value response = {0};
+    if(target_key == NULL) {
+        fprintf(stderr, "Need a target key!\n");
+        response = (json_value){0};
+        response.error = true;
+        return &response;
     }
 
-    char* target_key = ((argc == 3)?argv[2]:NULL);
+    size_t i;
+    for(i = 0; i < keys_len; i++) {
+        if(!strcmp(target_key, (keys[i]))) {
+            return &(json_values[i]);
+            break;
+        }
+    }
+    if(i == keys_len) {
+        fprintf(stderr, "Failed to find key!\n");
+        response = (json_value){0};
+        response.error = true;
+        return &response;
+    }
+}
 
-    char* json_data = argv[1];
+bool parse_json_data(char* json_data) {
+    if((keys != NULL) || (json_values != NULL)) {
+        deinit_parsed_data();
+    }
+
     size_t json_len = strlen(json_data);
     if(*json_data != '{') {
         fprintf(stderr, "Invalid JSON object!\n");
-        return 1;
+        return false;
     }
     if(json_data[json_len - 1] != '}') {
         fprintf(stderr, "Invalid JSON object!\n");
-        return 1;
+        return false;
     }
 
     memcpy(json_data, json_data + 1, json_len--);
@@ -38,13 +72,8 @@ int main(int argc, char** argv) {
 
     if(*json_data == '\0') {
         printf("Empty JSON object!\n");
-        return 0;
+        return false;
     }
-
-    char** keys = NULL;
-    size_t keys_len = 0;
-    json_value* json_values = NULL;
-    size_t values_len = 0;
 
     char* current_point = json_data;
 
@@ -96,7 +125,7 @@ int main(int argc, char** argv) {
 
             value_type type;
 
-            if(*value = '"') {
+            if(*value == '"') {
                 type = string;
                 char* string_value = NULL;
                 size_t string_len = 0;
@@ -148,55 +177,31 @@ int main(int argc, char** argv) {
         }
         current_point = is_more + 1;
     }
-
-    if(target_key == NULL) {
-        for(size_t i = 0; i < keys_len; i++) {
-            printf("\"%s\": ", keys[i]);
-            switch(json_values[i].type) {
-                case string: {
-                    printf("\"%s\"\n", json_values[i].value.string);
-                    break;
-                }
-                case number: {
-                    printf("%ld\n", json_values[i].value.number);
-                    break;
-                }
-            }
-        }
-    } else {
-        size_t i;
-        for(i = 0; i < keys_len; i++) {
-            if(!strcmp(target_key, keys[i])) {
-                printf("\"%s\": ", keys[i]);
-                switch(json_values[i].type) {
-                    case string: {
-                        printf("\"%s\"\n", json_values[i].value.string);
-                        break;
-                    }
-                    case number: {
-                        printf("%ld\n", json_values[i].value.number);
-                        break;
-                    }
-                }
-                break;
-            }
-        }
-        if(i == keys_len) {
-            fprintf(stderr, "Unable to find key \"%s\"!\n", target_key);
+    /*
+    size_t i;
+    for(i = 0; i < keys_len; i++) {
+        if(!strcmp(target_key, keys[i])) {
+            response = json_values[i];
         }
     }
+    if(i == keys_len) {
+        fprintf(stderr, "Unable to find key \"%s\"!\n", target_key);
+        response = (json_value){0};
+        response.error = true;
+    }
+    */
 
-    for(size_t i = 0; i < keys_len; i++) {
+    /*
+    for(i = 0; i < keys_len; i++) {
         free(keys[i]);
     }
     free(keys);
-
-    for(size_t i = 0; i < values_len; i++) {
+    for(i = 0; i < values_len; i++) {
         if(json_values[i].type == string) {
             free(json_values[i].value.string);
         }
     }
-    free(json_values);
+    */
 
-    return 0;
+    return true;
 }
