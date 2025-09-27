@@ -6,17 +6,18 @@
 #include <stdbool.h>
 #include "json.h"
 
-static char** keys = NULL;
-static size_t keys_len = 0;
-static json_value* json_values = NULL;
-static size_t values_len = 0;
+char** keys = NULL;
+size_t keys_len = 0;
+json_value* json_values = NULL;
+size_t values_len = 0;
 
 void deinit_parsed_data() {
     if(keys != NULL) {
         for(size_t i = 0; i < keys_len; i++) {
-            free(keys[i]);
+            free((keys[i]));
         }
         free(keys);
+        keys = NULL;
     }
     if(json_values != NULL) {
         for(size_t i = 0; i < values_len; i++) {
@@ -25,7 +26,10 @@ void deinit_parsed_data() {
             }
         }
         free(json_values);
+        json_values = NULL;
     }
+    keys_len = 0;
+    values_len = 0;
 }
 
 json_value* get_json_value(char* target_key) {
@@ -44,12 +48,10 @@ json_value* get_json_value(char* target_key) {
             break;
         }
     }
-    if(i == keys_len) {
-        fprintf(stderr, "Failed to find key!\n");
-        response = (json_value){0};
-        response.error = true;
-        return &response;
-    }
+    fprintf(stderr, "Failed to find key!\n");
+    response = (json_value){0};
+    response.error = true;
+    return &response;
 }
 
 bool parse_json_data(char* json_data) {
@@ -67,8 +69,9 @@ bool parse_json_data(char* json_data) {
         return false;
     }
 
-    memcpy(json_data, json_data + 1, json_len--);
-    json_data[json_len-- - 1] = '\0';
+    json_data++;
+    json_len--;
+    json_data[json_len - 1] = '\0';
 
     if(*json_data == '\0') {
         printf("Empty JSON object!\n");
@@ -83,9 +86,8 @@ bool parse_json_data(char* json_data) {
         if(key++ == NULL) { // TODO: properly handle this
             fprintf(stderr, "No keys but not empty!\n");
         }
-        char* key_start = key;
         size_t key_len = 0;
-        
+
         keys = (char**)realloc(keys, (++keys_len) * sizeof(char*));
         keys[keys_len - 1] = NULL;
 
