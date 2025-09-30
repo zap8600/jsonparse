@@ -205,3 +205,46 @@ bool parse_json_data(char* json_data) {
 
     return true;
 }
+
+char* create_json_data(char** keys_l, json_value* values_array, size_t amt) {
+    char* json_data = (char*)calloc(1, 4);
+    size_t json_data_len = 3;
+    char* json_ptr = json_data + 1;
+    size_t json_ptr_dis = 1;
+    for(size_t i = 0; i < amt; i++) {
+        json_ptr_dis = json_ptr - json_data;
+        json_data = (char*)realloc(json_data, (++json_data_len) + 1);
+        json_ptr = json_data + json_ptr_dis;
+        *json_ptr++ = '"';
+        size_t key_len = strlen(keys_l[i]);
+        for(size_t j = 0; j < key_len; j++) {
+            char ch = keys_l[i][j];
+            switch(ch) {
+                case '"' {
+                    json_data_len += 2;
+                    json_ptr_dis = json_ptr - json_data;
+                    json_data = (char*)realloc(json_data, json_data_len + 1);
+                    json_ptr = json_data + json_ptr_dis;
+                    *json_ptr++ = '\\';
+                    *json_ptr++ = '"';
+                    break;
+                }
+                case '\\': {
+                    json_data_len += 2;
+                    json_ptr_dis = json_ptr - json_data;
+                    json_data = (char*)realloc(json_data, json_data_len + 1);
+                    json_ptr = json_data + json_ptr_dis;
+                    *json_ptr++ = '\\';
+                    *json_ptr++ = '\\';
+                    break;
+                }
+                default: {
+                    json_ptr_dis = json_ptr - json_data;
+                    json_data = (char*)realloc(json_data, (++json_data_len) + 1);
+                    json_ptr = json_data + json_ptr_dis;
+                    break;
+                }
+            }
+        }
+    }
+}
