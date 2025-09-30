@@ -291,7 +291,7 @@ char* create_json_data(char** keys_l, json_value* values_array, size_t amt) {
                 unsigned long number_to_write;
                 unsigned long number_copy;
                 if(values_array[i].value.number < 0) {
-                    char* number_string = (char*)realloc(number_string, ++number_string_len);
+                    number_string = (char*)realloc(number_string, ++number_string_len);
                     *number_string = '-';
                     number_ptr = number_string + 1;
                     number_to_write = (unsigned long)(-(values_array[i].value.number));
@@ -315,7 +315,7 @@ char* create_json_data(char** keys_l, json_value* values_array, size_t amt) {
 
                 json_data_len += number_string_len;
                 json_ptr_dis = json_ptr - json_data;
-                json_data = (char*)realloc(json_data, number_string_len + 1);
+                json_data = (char*)realloc(json_data, json_data_len + 1);
                 json_ptr = json_data + json_ptr_dis;
                 memcpy(json_ptr, number_string, number_len);
                 json_ptr += number_len;
