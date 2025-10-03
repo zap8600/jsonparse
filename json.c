@@ -11,7 +11,7 @@ size_t keys_len = 0;
 json_value* json_values = NULL;
 size_t values_len = 0;
 
-void deinit_parsed_data() {
+void json_deinit_data() {
     if(keys != NULL) {
         for(size_t i = 0; i < keys_len; i++) {
             free((keys[i]));
@@ -32,10 +32,10 @@ void deinit_parsed_data() {
     values_len = 0;
 }
 
-json_value* get_json_value(char* target_key) {
+json_value* json_get_value(char* target_key) {
     static json_value response = {0};
     if(target_key == NULL) {
-        fprintf(stderr, "Need a target key!\n");
+        //fprintf(stderr, "Need a target key!\n");
         response = (json_value){0};
         response.error = true;
         return &response;
@@ -54,9 +54,9 @@ json_value* get_json_value(char* target_key) {
     return &response;
 }
 
-bool parse_json_data(char* json_data) {
+bool json_parse_data(char* json_data) {
     if((keys != NULL) || (json_values != NULL)) {
-        deinit_parsed_data();
+        json_deinit_data();
     }
 
     size_t json_len = strlen(json_data);
@@ -206,7 +206,7 @@ bool parse_json_data(char* json_data) {
     return true;
 }
 
-char* create_json_data(char** keys_l, json_value* values_array, size_t amt) {
+char* json_create_data(char** keys_l, json_value* values_array, size_t amt) {
     char* json_data = (char*)calloc(1, 4);
     size_t json_data_len = 3;
     char* json_ptr = json_data + 1;
