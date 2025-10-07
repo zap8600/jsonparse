@@ -38,7 +38,10 @@ static char* format_string(char** string_ptr) {
     return formatted_string;
 }
 
-static void get_value(json_object_t* object, char** data) {
+static json_array_t* parse_array(const char* data);
+static json_object_t* parse_object(const char* data);
+
+static void get_values(json_value_t** values, size_t len, char** data) {
     char* value = *data;
     while(1) {
         if(isspace(*value)) {
@@ -53,9 +56,9 @@ static void get_value(json_object_t* object, char** data) {
                     // String
                     value++;
                     const char* formatted_string = format_string(&value);
-                    object->values = (json_value_t*)realloc(object->values, object->len * sizeof(json_value_t));
-                    object->values[object->len - 1].type = json_string;
-                    object->values[object->len - 1].value.string = formatted_string;
+                    *values = (json_value_t*)realloc(*values, len * sizeof(json_value_t));
+                    (*values)[len - 1].type = json_string;
+                    (*values)[len - 1].value.string = formatted_string;
                     break;
                 }
                 case '[': {
@@ -83,18 +86,11 @@ static void get_value(json_object_t* object, char** data) {
     }
 }
 
-static json_array_t parse_array(const char* data) {
+static json_array_t* parse_array(const char* data) {
     char* value = data;
+    json_array_t* result_array = (json_array_t*)calloc(1, sizeof(json_array_t));
     while(1) {
-        if(isspace(*value)) {
-            value++;
-            continue;
-        }
-        if(*value != ']') {
-            //
-        } else {
-            //
-        }
+        //get_values();
     }
 }
 
@@ -106,8 +102,8 @@ static json_object_t* parse_object(const char* data) {
         const char* formatted_key = format_string(&key);
         result_object->keys = (char**)realloc(result_object->keys, (++(result_object->len)) * sizeof(char*));
         result_object->keys[result_object->len] = formatted_key;
-        char* value = strchr(key, ':');
-        //
+        char* value = strchr(key, ':') + 1;
+        get_values(&(result_object->values), &data);
     }
 }
 
